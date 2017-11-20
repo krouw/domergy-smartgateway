@@ -7,11 +7,9 @@ module.exports = class Meter {
   constructor ( xbeeProductId ) {
     const validate = this._validateConstructor( xbeeProductId )
     if( _.isEmpty(validate) ) {
-      this.zigbee = new Zigbee( xbeeProductId )
+      this.zigbee = new Zigbee( xbeeProductId, store )
       this.store = store
 
-
-      this.eventsZigbee()
     }
     else {
       throw new Error(JSON.stringify(validate))
@@ -27,16 +25,15 @@ module.exports = class Meter {
     }
 
     if( !store ) {
-      console.log(store, 'error store');
+      errors.store = 'Error Store'
     }
 
     return errors
 
   }
 
-  getState() {
-    console.log(this.store.getState());
-    return this.store.getState()
+  start (){
+    this.bootstrap()
   }
 
   bootstrap () {
@@ -48,6 +45,11 @@ module.exports = class Meter {
         console.log('error', e);
       }
     }, 10000)
+  }
+
+  getState() {
+    console.log(this.store.getState());
+    return this.store.getState()
   }
 
   async checkConnectZigbee () {
@@ -62,12 +64,6 @@ module.exports = class Meter {
     }
   }
 
-  eventsZigbee () {
-    this.zigbee.on('packet', (data) => {
-      console.log('packet', data);
-    })
-  }
-
   async connectZigbee () {
     console.log('connect');
     try {
@@ -78,8 +74,11 @@ module.exports = class Meter {
     }
   }
 
-  start (){
-    //this.bootstrap()
+
+  eventsZigbee () {
+    this.zigbee.on('packet', (data) => {
+      console.log('packet', data);
+    })
   }
 
 }

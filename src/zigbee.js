@@ -3,30 +3,32 @@ const xbee_api = require('xbee-api');
 const _ = require('lodash')
 const isJSON = require('../util/isJSON')
 const EventEmitter = require('events');
+const ActionsZigbee = require('./actions/zigbee')
 
 module.exports = class Zigbee extends EventEmitter {
 
-  constructor ( xbeeProductId ) {
+  constructor ( xbeeProductId, store ) {
     super()
-    const validate = this._validateConstructor( xbeeProductId )
+    const validate = this._validateConstructor( xbeeProductId, store )
 
     if( _.isEmpty(validate) ) {
       this.xbee = new xbee_api.XBeeAPI({
         api_mode: 2
       });
-      this.xbeeProductId = xbeeProductId
-      this.portInfo = {}
-      this.port = {}
-      this.connect = false
+      this.store = store
+      this.Serial = {}
 
-      this.fake()
+      this.setProductId(xbeeProductId)
+
+      //FAKE METER
+      //this.fake()
     }
     else {
       throw new Error(JSON.stringify(validate))
     }
   }
 
-  _validateConstructor( xbeeProductId ) {
+  _validateConstructor( xbeeProductId, store ) {
 
     let errors = {}
 
@@ -34,8 +36,46 @@ module.exports = class Zigbee extends EventEmitter {
       errors.xbeeProductId = "Parametro Invalido"
     }
 
+    if( !store ) {
+      errors.store = 'Error Store'
+    }
+
     return errors
 
+  }
+
+  getConnect () {
+    return this.store.getState().Zigbee.connect
+  }
+
+  setConnect ( Connect ) {
+    this.store.dispatch( ActionsZigbee.setConnect( Connect ) )
+  }
+
+  getProductId () {
+    return this.store.getState().Zigbee.productId
+  }
+
+  setProductId ( xbeeProductId ) {
+    this.store.dispatch( ActionsZigbee.setProductID( xbeeProductId ) )
+  }
+
+  setPortSerial ( port ) {
+    this.store.dispatch( ActionsZigbee.setPortSerial( port ) )
+  }
+
+  getPortSerial ( port ) {
+    return this.store.getState().Zigbee.SerialPort
+  }
+
+  async connectSerial () {
+    try {
+      await this.setPort()
+      await this.openPort()
+      this.eventsSerial()
+    } catch (e) {
+      throw e
+    }
   }
 
    findPort () {
@@ -47,8 +87,9 @@ module.exports = class Zigbee extends EventEmitter {
         }
         else {
           const filter = ports.filter( (port) => {
-            const parseId = '0x' + this.xbeeProductId
-            if ( port.xbeeProductId === this.xbeeProductId  || port.xbeeProductId === parseId ) {
+            const productId = this.getProductId()
+            const parseId = '0x' + productId
+            if ( port.productId === productId || port.productId === parseId ) {
               return true
             }
           })
@@ -67,9 +108,9 @@ module.exports = class Zigbee extends EventEmitter {
   async setPort ( ) {
     try {
       const port = await this.findPort()
-      this.portInfo = port;
-      this.port = new SerialPort(this.portInfo.comName, {
-        baudrate: 57600,
+      this.setPortSerial(port)
+      this.Serial = new SerialPort(this.getPortSerial().comName, {
+        baudRate: 57600,
         parser: this.xbee.rawParser(),
         autoOpen: false,
       })
@@ -79,22 +120,14 @@ module.exports = class Zigbee extends EventEmitter {
     }
   }
 
-  setConnect () {
-    this.connect = this.port.isOpen()
-  }
-
-  getConnect () {
-    return this.connect
-  }
-
   openPort () {
     return new Promise( (resolve, reject) => {
-      this.port.open((err) => {
+      this.Serial.open((err) => {
         if (err) {
           reject(err)
         }
         else {
-          this.setConnect()
+          this.setConnect( this.Serial.isOpen() )
           this.log('Serial Port Conectado')
           resolve()
         }
@@ -108,7 +141,6 @@ module.exports = class Zigbee extends EventEmitter {
     switch (action.type) {
       case 144:
         if( isJSON(buff) ){
-          console.log('buff json', buff);
           this.emit('packet', JSON.parse(buff))
         }
         break;
@@ -122,19 +154,9 @@ module.exports = class Zigbee extends EventEmitter {
       this.routerZigbee(frame)
     });
 
-    this.port.on('close', () => {
-      this.setConnect()
+    this.Serial.on('disconnect', () => {
+      this.setConnect( false )
     })
-  }
-
-  async connectSerial () {
-    try {
-      await this.setPort()
-      await this.openPort()
-      this.eventsSerial()
-    } catch (e) {
-      throw e
-    }
   }
 
   log(message) {
