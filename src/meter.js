@@ -40,11 +40,12 @@ module.exports = class Meter {
     setInterval( async () => {
       console.log('Interval');
       try {
-        await this.checkConnectZigbee()
+        await this.zigbee.checkConnectZigbee()
       } catch (e) {
         console.log('error', e);
       }
     }, 10000)
+    this.eventsZigbee()
   }
 
   getState() {
@@ -52,31 +53,8 @@ module.exports = class Meter {
     return this.store.getState()
   }
 
-  async checkConnectZigbee () {
-    console.log('var connect', this.zigbee.getConnect());
-    if( !this.zigbee.getConnect() ) {
-      console.log('checkConnectZigbee if');
-      try {
-        await this.connectZigbee()
-      } catch (e) {
-        throw e
-      }
-    }
-  }
-
-  async connectZigbee () {
-    console.log('connect');
-    try {
-      await this.zigbee.connectSerial()
-      this.eventsZigbee()
-    } catch (e) {
-      throw e
-    }
-  }
-
-
   eventsZigbee () {
-    this.zigbee.on('packet', (data) => {
+    this.zigbee.on('measurement', (data) => {
       console.log('packet', data);
     })
   }

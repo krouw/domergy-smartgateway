@@ -1,6 +1,12 @@
+// Zigbee
 const SET_PRODUCTID = 'SET_PRODUCTID'
 const SET_SERIALPORT = 'SET_SERIALPORT'
 const SET_CONNECT = 'SET_CONNECT'
+
+// Entity
+
+const ADD_ENTITY = 'ADD_ENTITY'
+
 
 module.exports = {
   SET_PRODUCTID: SET_PRODUCTID,

@@ -1,5 +1,5 @@
 const redux = require('redux')
-const Entitys = require('./Entitys')
+const Entitys = require('./Entity')
 const Mqtt = require('./Mqtt')
 const Zigbee = require('./Zigbee')
 

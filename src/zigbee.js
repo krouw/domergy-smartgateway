@@ -73,6 +73,7 @@ module.exports = class Zigbee extends EventEmitter {
       await this.setPort()
       await this.openPort()
       this.eventsSerial()
+
     } catch (e) {
       throw e
     }
@@ -135,13 +136,25 @@ module.exports = class Zigbee extends EventEmitter {
     })
   }
 
+  async checkConnectZigbee () {
+    console.log('var connect', this.getConnect());
+    if( !this.getConnect() ) {
+      console.log('checkConnectZigbee if');
+      try {
+        await this.connectSerial()
+      } catch (e) {
+        throw e
+      }
+    }
+  }
+
   routerZigbee ( action ) {
     const buff = action.data.toString()
     console.log('buff', buff);
     switch (action.type) {
       case 144:
         if( isJSON(buff) ){
-          this.emit('packet', JSON.parse(buff))
+          this.emit('measurement', JSON.parse(buff))
         }
         break;
       default:
