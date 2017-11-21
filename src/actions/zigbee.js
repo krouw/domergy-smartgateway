@@ -16,7 +16,7 @@ const setPortSerial = ( SerialPort ) => {
 
 const setConnect = ( Connect ) => {
   return {
-    type: TYPES.SET_CONNECT,
+    type: TYPES.SET_ZIGBEECONNECT,
     connect: Connect,
   }
 }

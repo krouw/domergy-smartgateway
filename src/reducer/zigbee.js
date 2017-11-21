@@ -16,7 +16,7 @@ module.exports = (state = initialState, action = {}) => {
       return Object.assign({}, state, {
               SerialPort: action.SerialPort,
              })
-    case TYPES.SET_CONNECT:
+    case TYPES.SET_ZIGBEECONNECT:
       return Object.assign({}, state, {
              connect: action.connect,
             })

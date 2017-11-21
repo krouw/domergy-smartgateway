@@ -1,14 +1,16 @@
-const initialState = {
-  status: {}
-}
+const TYPES = require('../actions/types')
 
-const ADD_VALUE = 'ADD_VALUE'
+const initialState = {
+  mqttActive: false,
+  pinged: { },
+  server: '',
+}
 
 module.exports = (state = initialState, action = {}) => {
   switch (action.type) {
-    case ADD_VALUE:
+    case TYPES.SET_MQTTSERVER:
       return Object.assign({}, state, {
-              value: state.value + 1,
+              server: action.server
              })
     default:
         return state;
