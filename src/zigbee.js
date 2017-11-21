@@ -153,9 +153,7 @@ module.exports = class Zigbee extends EventEmitter {
     console.log('buff', buff);
     switch (action.type) {
       case 144:
-        if( isJSON(buff) ){
-          this.emit('measurement', JSON.parse(buff))
-        }
+        this.emit('measurement', buff)
         break;
       default:
         break;

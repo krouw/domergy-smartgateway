@@ -67,12 +67,32 @@ module.exports = class Meter {
   eventsZigbee () {
     this.zigbee.on('measurement', (data) => {
       //console.log('packet', data);
-      this.mqttPublish(data)
+      this.buildFrame(data)
     })
+  }
+
+  buildFrame( packet ) {
+    if( _.isString(packet) ) {
+      const split = packet.split(',')
+      const payload = {
+        id_device: split[0],
+        id_attribute: split[1],
+        value: split[2],
+        timestamp:split[3]+'T'+split[4],
+      }
+      this.mqttPublish(payload)
+    }
+    else {
+      this.log('Error Packet')
+    }
   }
 
   setMqttServer ( server ) {
     this.store.dispatch( ActionsMqtt.setMqttServer( server ) )
+  }
+
+  log(message) {
+    console.log(new Date().toString(), message);
   }
 
   mqttPublish ( packet ) {
