@@ -1,25 +1,27 @@
 const Zigbee = require('./zigbee')
 const _ = require('lodash')
 const store = require('./store')
+const moment = require('moment')
 const ActionsMqtt = require('./actions/Mqtt')
 
 module.exports = class Meter {
 
-  constructor ( id, xbeeProductId, mqttServer ) {
-    const validate = this._validateConstructor( id, xbeeProductId, mqttServer )
+  constructor ( id, xbeeProductId, mqttConfig ) {
+    const validate = this._validateConstructor( id, xbeeProductId, mqttConfig )
     if( _.isEmpty(validate) ) {
       this.id = id
       this.zigbee = new Zigbee( xbeeProductId, store )
       this.store = store
 
-      this.setMqttServer( mqttServer )
+      this.setMqttServer( mqttConfig.server )
+      this.setMqttClient( mqttConfig.client )
     }
     else {
       throw new Error(JSON.stringify(validate))
     }
   }
 
-  _validateConstructor( id, xbeeProductId, mqttServer ) {
+  _validateConstructor( id, xbeeProductId, mqttConfig ) {
 
     let errors = {}
 
@@ -27,8 +29,8 @@ module.exports = class Meter {
       errors.xbeeProductId = "Parametro Invalido"
     }
 
-    if( !_.isString( mqttServer ) ){
-      errors.mqttServer = "Parametro Invalido"
+    if( _.isEmpty( mqttConfig ) ){
+      errors.mqttConfig = "Parametro Invalido"
     }
 
     if( _.isEmpty(id) ) {
@@ -71,6 +73,36 @@ module.exports = class Meter {
     })
   }
 
+  validateAttribute ( attribute ) {
+    return new Promise((resolve, reject) => {
+      let errors;
+
+      if( _.isEmpty(attribute.id_attribute) ){
+        errors.id_attribute = 'Parametro Invalido'
+      }
+
+      if( _.isEmpty(attribute.id_device) ){
+        errors.id_device = 'Parametro Invalido'
+      }
+
+      if( !_.isDate(attribute.timestamp) ){
+        errors.timestamp = 'Parametro Invalido'
+      }
+
+      if( _.isEmpty(attribute.value) ){
+        errors.attribute.value = 'Parametro Invalido'
+      }
+
+      if( _.isEmpty(errors)  ){
+        resolve()
+      }
+      else {
+        reject(errors)
+      }
+
+    })
+  }
+
   buildFrame( packet ) {
     if( _.isString(packet) ) {
       const split = packet.split(',')
@@ -78,9 +110,16 @@ module.exports = class Meter {
         id_device: split[0],
         id_attribute: split[1],
         value: split[2],
-        timestamp:split[3]+'T'+split[4],
+        timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss").toDate()
       }
-      this.mqttPublish(payload)
+
+      this.validateAttribute( payload )
+        .then((value) => {
+          this.mqttPublish(payload)
+        })
+        .catch((err) => {
+          console.log('Error Build Frame', err)
+        })
     }
     else {
       this.log('Error Packet')
@@ -91,12 +130,26 @@ module.exports = class Meter {
     this.store.dispatch( ActionsMqtt.setMqttServer( server ) )
   }
 
+  getMqttServer ( ) {
+    return this.store.getState().Mqtt.server
+  }
+
+  setMqttClient ( client ) {
+    this.store.dispatch ( ActionsMqtt.setMqttClient(client) )
+  }
+
+  getMqttClient ( ) {
+    return this.store.getState().Mqtt.client
+  }
+
   log(message) {
     console.log(new Date().toString(), message);
   }
 
   mqttPublish ( packet ) {
-    const service = this.store.getState().Mqtt.server
+    const service = {
+      server: this.getMqttServer(),
+      client: this.getMqttClient() }
     const payload = {
       data: packet,
       topic: 'entity/attr/'

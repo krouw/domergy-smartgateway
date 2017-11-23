@@ -150,7 +150,7 @@ module.exports = class Zigbee extends EventEmitter {
 
   routerZigbee ( action ) {
     const buff = action.data.toString()
-    console.log('buff', buff);
+    //console.log('buff', buff);
     switch (action.type) {
       case 144:
         this.emit('measurement', buff)

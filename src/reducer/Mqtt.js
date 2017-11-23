@@ -12,6 +12,10 @@ module.exports = (state = initialState, action = {}) => {
       return Object.assign({}, state, {
               server: action.server
              })
+   case TYPES.SET_MQTTCLIENT:
+     return Object.assign({}, state, {
+             client: action.client
+            })
     default:
         return state;
   }
