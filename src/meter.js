@@ -75,13 +75,13 @@ module.exports = class Meter {
 
   validateAttribute ( attribute ) {
     return new Promise((resolve, reject) => {
-      let errors;
+      let errors = {};
 
-      if( _.isEmpty(attribute.id_attribute) ){
+      if( _.isEmpty(attribute.id_attribute) || !_.isNumber(parseInt(attribute.id_attribute)) ){
         errors.id_attribute = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(attribute.id_device) ){
+      if( _.isEmpty(attribute.id_device) || !_.isNumber(parseInt(attribute.id_device))){
         errors.id_device = 'Parametro Invalido'
       }
 
@@ -89,8 +89,8 @@ module.exports = class Meter {
         errors.timestamp = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(attribute.value) ){
-        errors.attribute.value = 'Parametro Invalido'
+      if( _.isEmpty(attribute.value) || !_.isNumber(parseInt(attribute.value)) ){
+        errors.value = 'Parametro Invalido'
       }
 
       if( _.isEmpty(errors)  ){
