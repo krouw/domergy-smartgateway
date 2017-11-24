@@ -4,7 +4,7 @@ const config = {
   id: '01',
   xbeeProductId: '6001',
   mqtt: {
-    server: 'mqtt://localhost:1883',
+    server: 'mqtt://192.168.0.2:1883',
     client: 'rasp1'
   }
 }

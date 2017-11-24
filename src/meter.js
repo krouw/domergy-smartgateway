@@ -51,7 +51,7 @@ module.exports = class Meter {
 
   bootstrap () {
     setInterval( async () => {
-      console.log('Interval');
+      //console.log('Interval');
       try {
         await this.zigbee.checkConnectZigbee()
       } catch (e) {
@@ -61,11 +61,6 @@ module.exports = class Meter {
     this.eventsZigbee()
   }
 
-  getState() {
-    console.log(this.store.getState());
-    return this.store.getState()
-  }
-
   eventsZigbee () {
     this.zigbee.on('measurement', (data) => {
       //console.log('packet', data);
@@ -73,28 +68,40 @@ module.exports = class Meter {
     })
   }
 
-  validateAttribute ( attribute ) {
+  validateFrame ( packet ) {
     return new Promise((resolve, reject) => {
       let errors = {};
+      const split = packet.split(',')
+      const payload = {
+        id_device: split[0],
+        id_attribute: split[1],
+        value: split[2],
+        timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss").toDate()
+      }
 
-      if( _.isEmpty(attribute.id_attribute) || !_.isNumber(parseInt(attribute.id_attribute)) ){
+      if( !_.isString(packet) || !split.length == 5) {
+        errors.packet = 'Paquete Invalido'
+        reject(errors)
+      }
+
+      if( _.isEmpty(payload.id_attribute) || !_.isNumber(parseInt(payload.id_attribute)) ){
         errors.id_attribute = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(attribute.id_device) || !_.isNumber(parseInt(attribute.id_device))){
+      if( _.isEmpty(payload.id_device) || !_.isNumber(parseInt(payload.id_device))){
         errors.id_device = 'Parametro Invalido'
       }
 
-      if( !_.isDate(attribute.timestamp) ){
+      if( !_.isDate(payload.timestamp) ){
         errors.timestamp = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(attribute.value) || !_.isNumber(parseInt(attribute.value)) ){
+      if( _.isEmpty(payload.value) || !_.isNumber(parseInt(payload.value)) ){
         errors.value = 'Parametro Invalido'
       }
 
       if( _.isEmpty(errors)  ){
-        resolve()
+        resolve(payload)
       }
       else {
         reject(errors)
@@ -104,26 +111,13 @@ module.exports = class Meter {
   }
 
   buildFrame( packet ) {
-    if( _.isString(packet) ) {
-      const split = packet.split(',')
-      const payload = {
-        id_device: split[0],
-        id_attribute: split[1],
-        value: split[2],
-        timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss").toDate()
-      }
-
-      this.validateAttribute( payload )
-        .then((value) => {
-          this.mqttPublish(payload)
-        })
-        .catch((err) => {
-          console.log('Error Build Frame', err)
-        })
-    }
-    else {
-      this.log('Error Packet')
-    }
+    this.validateFrame( packet )
+      .then((payload) => {
+        this.mqttPublish(payload)
+      })
+      .catch((err) => {
+        console.error(err);
+      })
   }
 
   setMqttServer ( server ) {
