@@ -79,7 +79,7 @@ module.exports = class Meter {
         timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss").toDate()
       }
 
-      if( !_.isString(packet) || !split.length == 5) {
+      if( !_.isString(packet) || split.length != 5) {
         errors.packet = 'Paquete Invalido'
         reject(errors)
       }
