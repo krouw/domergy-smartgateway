@@ -174,15 +174,15 @@ module.exports = class Zigbee extends EventEmitter {
     console.log(new Date().toString(), message);
   }
 
-  fake(){
+  fake () {
     const object = {
-      data: new Buffer('7b2276223a312e357d', 'hex'),
+      data: new Buffer('30332c33333238332c312e322c323031372f31322f31312c31373a31333a3237', 'hex'),
       type: 144,
     }
 
     setInterval( () => {
       this.routerZigbee(object)
-    }, 10000)
+    }, 5000)
 
   }
 

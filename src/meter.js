@@ -3,18 +3,20 @@ const _ = require('lodash')
 const store = require('./store')
 const moment = require('moment')
 const ActionsMqtt = require('./actions/Mqtt')
+const struct = require('superstruct').struct
 
 module.exports = class Meter {
 
-  constructor ( id, xbeeProductId, mqttConfig ) {
-    const validate = this._validateConstructor( id, xbeeProductId, mqttConfig )
+  constructor ( config ) {
+    const validate = this._validateConstructor( config.id , config.xbeeProductId, config.mqtt )
     if( _.isEmpty(validate) ) {
-      this.id = id
-      this.zigbee = new Zigbee( xbeeProductId, store )
+      this.id = config.id
+      this.zigbee = new Zigbee( config.xbeeProductId, store )
       this.store = store
+      this.interval = config.interval || 10000
 
-      this.setMqttServer( mqttConfig.server )
-      this.setMqttClient( mqttConfig.client )
+      this.setMqttServer( `${config.mqtt.server}:${config.mqtt.port}` )
+      this.setMqttClient( config.mqtt.client )
     }
     else {
       throw new Error(JSON.stringify(validate))
@@ -45,8 +47,16 @@ module.exports = class Meter {
 
   }
 
-  start (){
+  start () {
     this.bootstrap()
+
+    /*
+    *
+    * Fake Meter
+    *
+    this.zigbee.fake()
+    this.eventsZigbee()
+    */
   }
 
   bootstrap () {
@@ -57,12 +67,12 @@ module.exports = class Meter {
       } catch (e) {
         console.log('error', e);
       }
-    }, 10000)
+    }, this.interval)
     this.eventsZigbee()
   }
 
   eventsZigbee () {
-    this.zigbee.on('measurement', (data) => {
+    this.zigbee.on('measurement', ( data ) => {
       //console.log('packet', data);
       this.buildFrame(data)
     })
@@ -76,7 +86,7 @@ module.exports = class Meter {
         id_device: split[0],
         id_attribute: split[1],
         value: split[2],
-        timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss").toDate()
+        timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss", true).toDate()
       }
 
       if( !_.isString(packet) || split.length != 5) {
@@ -84,19 +94,19 @@ module.exports = class Meter {
         reject(errors)
       }
 
-      if( _.isEmpty(payload.id_attribute) || !_.isNumber(parseInt(payload.id_attribute)) ){
+      if( _.isEmpty(payload.id_attribute) || !_.isInteger(+payload.id_attribute) ) {
         errors.id_attribute = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(payload.id_device) || !_.isNumber(parseInt(payload.id_device))){
+      if( _.isEmpty(payload.id_device) || !_.isInteger(+payload.id_device) ) {
         errors.id_device = 'Parametro Invalido'
       }
 
-      if( !_.isDate(payload.timestamp) ){
+      if( !moment(payload.timestamp).isValid() ){
         errors.timestamp = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(payload.value) || !_.isNumber(parseInt(payload.value)) ){
+      if( _.isEmpty(payload.value) || !isFinite(+payload.value) ){
         errors.value = 'Parametro Invalido'
       }
 
