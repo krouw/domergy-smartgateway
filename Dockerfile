@@ -12,4 +12,6 @@ RUN npm install
 # If you are building your code for production
 # RUN npm install --only=production
 
+# RUN cd node_modules/serialport && node-gyp configure build
+
 CMD [ "node", "index.js" ]

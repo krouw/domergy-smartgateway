@@ -8,13 +8,14 @@ if ( process.env.NODE_ENV === 'development' ) {
 require('dotenv').config({ path: env_path })
 
 const config = {
-  id: '01',
-  xbeeProductId: '6001',
+  id: process.env.ID,
+  xbeeProductId: process.env.ID_XBEE,
   mqtt: {
-    server: process.env.SERVER || 'mqtt://192.168.0.2',
-    port: process.env.PORT || '1883',
-    client: process.env.CLIENT || 'rasp1'
-  }
+    server: process.env.MQTT_SERVER,
+    port: process.env.MQTT_PORT,
+    client: process.env.MQTT_CLIENT
+  },
+  interval: 5000,
 }
 
 const meter = new Meter( config )

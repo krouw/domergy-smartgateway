@@ -54,6 +54,7 @@ module.exports = class Meter {
     *
     * Fake Meter
     *
+    *
     this.zigbee.fake()
     this.eventsZigbee()
     */

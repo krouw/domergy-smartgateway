@@ -4,7 +4,7 @@
   "description": "Smar Meter",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch ./ --exec node index.js",
+    "start": "nodemon --watch ./ --exec NODE_ENV=development node index.js",
     "service": "pm2 start index.js --node-args='--harmony'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

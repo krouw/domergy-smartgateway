@@ -1,6 +1,7 @@
 const SerialPort = require('serialport');
 const xbee_api = require('xbee-api');
 const _ = require('lodash')
+const moment = require('moment')
 const isJSON = require('../util/isJSON')
 const EventEmitter = require('events');
 const ActionsZigbee = require('./actions/zigbee')
@@ -20,8 +21,6 @@ module.exports = class Zigbee extends EventEmitter {
 
       this.setProductId(xbeeProductId)
 
-      //FAKE METER
-      //this.fake()
     }
     else {
       throw new Error(JSON.stringify(validate))
@@ -150,7 +149,7 @@ module.exports = class Zigbee extends EventEmitter {
 
   routerZigbee ( action ) {
     const buff = action.data.toString()
-    console.log('buff', buff);
+    console.log('buffer', buff);
     switch (action.type) {
       case 144:
         this.emit('measurement', buff)
@@ -175,12 +174,22 @@ module.exports = class Zigbee extends EventEmitter {
   }
 
   fake () {
-    const object = {
-      data: new Buffer('30332c33333238332c312e322c323031372f31322f31312c31373a31333a3237', 'hex'),
-      type: 144,
+
+    const hexEncode = (str) => {
+      var hex = '';
+    	for(var i=0;i<str.length;i++) {
+    		hex += ''+str.charCodeAt(i).toString(16);
+    	}
+	    return hex;
     }
 
     setInterval( () => {
+      const frame = `03,3316,1.2,${moment().format("DD/MM/YYYY")},${moment().format("HH:mm:ss")}`
+      const object = {
+        data: new Buffer( hexEncode(frame) , 'hex'),
+        type: 144,
+      }
+
       this.routerZigbee(object)
     }, 5000)
 

@@ -2,15 +2,17 @@ const expect = require("chai").expect
 const Meter = require('../src/meter')
 const assert = require('chai').assert
 
+require('dotenv').config({ path: '.env.development' })
+
 describe("attributeValidation", () => {
 
   const config = {
-    id: '01',
-    xbeeProductId: '6001',
+    id: process.env.ID,
+    xbeeProductId: process.env.ID_XBEE,
     mqtt: {
-      server: 'mqtt://192.168.0.2',
-      port: '1883',
-      client: 'rasp1'
+      server: process.env.MQTT_SERVER,
+      port: process.env.MQTT_PORT,
+      client: process.env.MQTT_CLIENT
     }
   }
 
@@ -42,7 +44,7 @@ describe("attributeValidation", () => {
       '03,3331, 0.000,01/11/2020,19:04:05',
       '02,3316,1.2,02/06/2010,18:04:27',
       '92,33281,227.12332,02/12/2017,20:18:03',
-      '01,3317,1.323,11/12/2017,20:22:00'
+      '01,3317,1.323,11/12/2017,20:22:00',
     ]
 
     testPromise(test)
@@ -66,7 +68,8 @@ describe("attributeValidation", () => {
       '23,3318,1.23,02-11-20-1,08',
       '22,3317,32.3,20/18/2017,22:32:01',
       '22,3317,32.3,20/12/2017,22:80:01',
-      '3sdsa,dasdas,,dasd,dsa'
+      '3sdsa,dasdas,,dasd,dsa',
+      '33,3321,32.2,-4/2/2017,33:22:11'
     ]
 
     testPromise(test)
