@@ -73,9 +73,9 @@ module.exports = class Meter {
   }
 
   eventsZigbee () {
-    this.zigbee.on('measurement', ( data ) => {
+    this.zigbee.on('measurement', ( packet ) => {
       //console.log('packet', data);
-      this.buildFrame(data)
+      this.buildFrame( packet )
     })
   }
 
