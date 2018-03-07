@@ -3,7 +3,6 @@ const _ = require('lodash')
 const store = require('./store')
 const moment = require('moment')
 const ActionsMqtt = require('./actions/Mqtt')
-const struct = require('superstruct').struct
 
 module.exports = class Meter {
 

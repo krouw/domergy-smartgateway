@@ -129,20 +129,7 @@ module.exports = class Zigbee extends EventEmitter {
           reject(err)
         }
         else {
-
-          var frame = {
-              type: 0x10,
-              id: 0x01,
-              destination64: "0013A200415117745",
-              broadcastRadius: 0x00,
-              options: 0x00,
-              data: "Hello world",
-            };
-
-            this.Serial.write(this.xbee.buildFrame(frame), (err, res) => {
-              if (err) throw(err);
-              else     console.log("Message");
-          });
+          this.sendZigbee('t')
           this.setConnect( this.Serial.isOpen() )
           this.log('Serial Port Conectado')
           resolve()
@@ -150,6 +137,22 @@ module.exports = class Zigbee extends EventEmitter {
       })
     })
   }
+
+    sendZigbee( data ) {
+      var frame = {
+          type: 0x10,
+          id: 0x01,
+          destination64: "0013A200415b5d84",
+          broadcastRadius: 0x00,
+          options: 0x00,
+          data,
+        };
+
+      this.Serial.write(this.xbee.buildFrame(frame), (err, res) => {
+          if (err) throw(err);
+          else     console.log("Message");
+      });
+    }
 
   async checkConnectZigbee () {
     console.log('var connect', this.getConnect());
