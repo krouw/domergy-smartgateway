@@ -12,18 +12,18 @@
   "license": "GPL-3.0",
   "dependencies": {
     "dotenv": "^4.0.0",
-    "lodash": "^4.17.4",
-    "moment": "^2.19.2",
-    "mqtt": "^2.14.0",
+    "lodash": "^4.17.5",
+    "moment": "^2.21.0",
+    "mqtt": "^2.16.0",
     "redux": "^3.7.2",
-    "serialport": "4.0.7",
-    "superstruct": "^0.4.9",
-    "xbee-api": "^0.5.5"
+    "serialport": "^4.0.7",
+    "superstruct": "^0.4.12",
+    "xbee-api": "^0.5.6"
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^4.0.1",
-    "nodemon": "^1.12.1",
+    "mocha": "^4.1.0",
+    "nodemon": "^1.17.1",
     "redux-node-logger": "^0.1.0"
   }
 }

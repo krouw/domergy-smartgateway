@@ -5,6 +5,8 @@ const moment = require('moment')
 const isJSON = require('../util/isJSON')
 const EventEmitter = require('events');
 const ActionsZigbee = require('./actions/zigbee')
+var C = xbee_api.constants;
+const util = require('util')
 
 module.exports = class Zigbee extends EventEmitter {
 
@@ -127,6 +129,20 @@ module.exports = class Zigbee extends EventEmitter {
           reject(err)
         }
         else {
+
+          var frame = {
+              type: 0x10,
+              id: 0x01,
+              destination64: "0013A200415117745",
+              broadcastRadius: 0x00,
+              options: 0x00,
+              data: "Hello world",
+            };
+
+            this.Serial.write(this.xbee.buildFrame(frame), (err, res) => {
+              if (err) throw(err);
+              else     console.log("Message");
+          });
           this.setConnect( this.Serial.isOpen() )
           this.log('Serial Port Conectado')
           resolve()
@@ -148,11 +164,11 @@ module.exports = class Zigbee extends EventEmitter {
   }
 
   routerZigbee ( action ) {
-    const buff = action.data.toString()
-    console.log('buffer', buff);
+    console.log('action', action);
     switch (action.type) {
       case 144:
-        this.emit('measurement', buff)
+        const messageZB = action.data.toSting();
+        this.emit('measurement', messageZB)
         break;
       default:
         break;
@@ -177,10 +193,10 @@ module.exports = class Zigbee extends EventEmitter {
 
     const hexEncode = (str) => {
       var hex = '';
-    	for(var i=0;i<str.length;i++) {
-    		hex += ''+str.charCodeAt(i).toString(16);
-    	}
-	    return hex;
+      for(var i=0;i<str.length;i++) {
+        hex += ''+str.charCodeAt(i).toString(16);
+      }
+      return hex;
     }
 
     setInterval( () => {
