@@ -167,7 +167,7 @@ module.exports = class Zigbee extends EventEmitter {
     console.log('action', action);
     switch (action.type) {
       case 144:
-        const messageZB = action.data.toSting();
+        const messageZB = action.data.toString();
         this.emit('measurement', messageZB)
         break;
       default:
