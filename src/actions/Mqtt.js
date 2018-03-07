@@ -1,5 +1,5 @@
 const TYPES = require('./types')
-const mqttService = require('../services/mqtt')
+const { publish } = require('../services/mqtt')
 
 const setMqttServer = ( server ) => {
   return {
@@ -15,8 +15,8 @@ const setMqttClient = ( client ) => {
   }
 }
 
-const mqttPublish = ( service, payload ) => {
-  mqttService(service, payload)
+const mqttPublish = ( payload ) => {
+  publish( payload )
 }
 
 module.exports = {

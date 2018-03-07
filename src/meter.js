@@ -3,6 +3,7 @@ const _ = require('lodash')
 const store = require('./store')
 const moment = require('moment')
 const ActionsMqtt = require('./actions/Mqtt')
+const mqtt = require('mqtt')
 
 module.exports = class Meter {
 
@@ -13,9 +14,9 @@ module.exports = class Meter {
       this.zigbee = new Zigbee( config.xbeeProductId, store )
       this.store = store
       this.interval = config.interval || 10000
-
-      this.setMqttServer( `${config.mqtt.server}:${config.mqtt.port}` )
-      this.setMqttClient( config.mqtt.client )
+      this.mqttClient = mqtt.connect(`${config.mqtt.server}:${config.mqtt.port}`, {
+        clientId: config.mqtt.client
+       })
     }
     else {
       throw new Error(JSON.stringify(validate))
@@ -49,6 +50,12 @@ module.exports = class Meter {
   start () {
     this.bootstrap()
 
+
+     this.mqttClient.on('connect', () => {
+       this.mqttClient.subscribe('entity/relay/')
+     });
+
+
     /*
     *
     * Fake Meter
@@ -69,11 +76,28 @@ module.exports = class Meter {
       }
     }, this.interval)
     this.eventsZigbee()
+    this.eventsMqtt()
+  }
+
+  eventsMqtt(){
+    this.mqttClient.on('packetreceive', (packet) => {
+       if ( packet.topic === 'entity/relay/' && packet.payload ) {
+         const payload = JSON.parse(packet.payload.toString())
+         if ( payload.id_attribute === '3333' ){
+           if( payload.value  ){
+             this.zigbee.sendZigbee('t')
+           }
+           else {
+             this.zigbee.sendZigbee('f')
+           }
+         }
+       }
+   })
   }
 
   eventsZigbee () {
     this.zigbee.on('measurement', ( packet ) => {
-      //console.log('packet', data);
+      //console.log('packet', packet);
       this.buildFrame( packet )
     })
   }
@@ -151,14 +175,16 @@ module.exports = class Meter {
   }
 
   mqttPublish ( packet ) {
-    const service = {
-      server: this.getMqttServer(),
-      client: this.getMqttClient() }
     const payload = {
       data: packet,
       topic: 'entity/attr/'
     }
-    ActionsMqtt.mqttPublish( service, payload )
+    if (  _.isEmpty(payload) ) {
+      return;
+    }
+     const data = JSON.stringify(payload.data);
+     this.mqttClient.publish(payload.topic, data);
+     console.log('MQTT message published: ', data);
   }
 
 }
