@@ -142,7 +142,7 @@ module.exports = class Zigbee extends EventEmitter {
       var frame = {
           type: 0x10,
           id: 0x01,
-          destination64: "0013A200415b5d84",
+          destination64: "0013a20041517745",
           broadcastRadius: 0x00,
           options: 0x00,
           data,
