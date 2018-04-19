@@ -122,11 +122,12 @@ module.exports = class Meter {
         errors.id_attribute = 'Parametro Invalido'
       }
 
-      if( _.isEmpty(payload.id_device) || !_.isInteger(+payload.id_device) ) {
+      if( _.isEmpty(payload.id_device) ) {
         errors.id_device = 'Parametro Invalido'
       }
 
       if( !moment(payload.timestamp).isValid() ){
+        console.log('timestamp inválido');
         payload.timestamp = moment.utc();
       }
 

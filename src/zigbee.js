@@ -168,6 +168,7 @@ module.exports = class Zigbee extends EventEmitter {
 
   routerZigbee ( action ) {
     console.log('action', action);
+    console.log('packet', action.data.toString());
     switch (action.type) {
       case 144:
         const messageZB = action.data.toString();
