@@ -88,6 +88,7 @@ module.exports = class Zigbee extends EventEmitter {
           throw err
         }
         else {
+            this.log(ports)
           const filter = ports.filter( (port) => {
             const productId = this.getProductId()
             const parseId = '0x' + productId
@@ -129,7 +130,6 @@ module.exports = class Zigbee extends EventEmitter {
           reject(err)
         }
         else {
-          this.sendZigbee('t')
           this.setConnect( this.Serial.isOpen() )
           this.log('Serial Port Conectado')
           resolve()

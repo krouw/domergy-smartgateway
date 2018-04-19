@@ -127,7 +127,7 @@ module.exports = class Meter {
       }
 
       if( !moment(payload.timestamp).isValid() ){
-        errors.timestamp = 'Parametro Invalido'
+        payload.timestamp = moment.utc();
       }
 
       if( _.isEmpty(payload.value) || !isFinite(+payload.value) ){
