@@ -14,14 +14,14 @@ module.exports = class Meter {
       this.zigbee = new Zigbee( config.xbeeProductId, store )
       this.store = store
       this.interval = config.interval || 10000
-      this.mqttLocal = {
+      this.mqttLocalConfig = {
         server: '10.108.0.10',
         port: '1883',
       }
       this.mqttClient = mqtt.connect(`${config.mqtt.server}:${config.mqtt.port}`, {
         clientId: config.mqtt.client
        })
-       this.mqttLocal = mqtt.connect(`${this.mqttLocal.server}:${this.mqttLocal.port}`, {
+       this.mqttLocal = mqtt.connect(`${this.mqttLocalConfig.server}:${this.mqttLocalConfig.port}`, {
          clientId: config.mqtt.client
         })
     }
