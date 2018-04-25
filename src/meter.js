@@ -14,9 +14,16 @@ module.exports = class Meter {
       this.zigbee = new Zigbee( config.xbeeProductId, store )
       this.store = store
       this.interval = config.interval || 10000
+      this.mqttITCity = {
+        server: 'pird.ddns.net',
+        port: '1883',
+      }
       this.mqttClient = mqtt.connect(`${config.mqtt.server}:${config.mqtt.port}`, {
         clientId: config.mqtt.client
        })
+       this.mqttClientITCity = mqtt.connect(`${this.mqttITCity.server}:${this.mqttITCity.port}`, {
+         clientId: config.mqtt.client
+        })
     }
     else {
       throw new Error(JSON.stringify(validate))
@@ -185,6 +192,7 @@ module.exports = class Meter {
     }
      const data = JSON.stringify(payload.data);
      this.mqttClient.publish(payload.topic, data);
+     this.mqttClientITCity.publish(payload.topic, data)
      console.log('MQTT message published: ', data);
   }
 
