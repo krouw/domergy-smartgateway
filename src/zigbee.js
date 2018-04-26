@@ -88,7 +88,6 @@ module.exports = class Zigbee extends EventEmitter {
           throw err
         }
         else {
-            this.log(ports)
           const filter = ports.filter( (port) => {
             const productId = this.getProductId()
             const parseId = '0x' + productId
@@ -167,8 +166,8 @@ module.exports = class Zigbee extends EventEmitter {
   }
 
   routerZigbee ( action ) {
-    console.log('action', action);
-    console.log('packet', action.data.toString());
+    //console.log('action', action);
+    //console.log('packet', action.data.toString());
     switch (action.type) {
       case 144:
         const messageZB = action.data.toString();
