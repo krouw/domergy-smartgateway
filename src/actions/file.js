@@ -9,6 +9,19 @@ const deleteFile = ( file ) => {
 
 }
 
+const checkFile = ( file, next ) => {
+  fs.stat(file, (err, stats) => {
+    if (err){
+      next(err);
+    }
+    else {
+      next(null, stats)
+    }
+  });
+}
+
+
 module.exports = {
   deleteFile,
+  checkFile
 }

@@ -3,6 +3,7 @@ const _ = require('lodash')
 const store = require('./store')
 const moment = require('moment')
 const ActionsMqtt = require('./actions/Mqtt')
+const { checkFile, deleteFile } = require('./actions/file')
 const mqttClient = require('./services/mqtt')
 
 module.exports = class SmartGateway {
@@ -61,11 +62,37 @@ module.exports = class SmartGateway {
     */
   }
 
+  deleteLog () {
+    const log = './out-0.log',
+          errorlog = './err-0.log'
+    checkFile(log, ( err, stat ) => {
+      if(err){
+       console.log('Error File log', err);
+      }
+      else {
+        if ( stat.size > 200000000 ) {
+          deleteFile(log)
+        }
+      }
+    })
+    checkFile(errorlog, ( err, stat ) => {
+      if(err){
+       console.log('Error File errorlog', err);
+      }
+      else {
+        if ( stat.size > 200000000 ) {
+          deleteFile(errorlog)
+        }
+      }
+    })
+  }
+
   async bootstrap () {
     setInterval( async () => {
       //console.log('Interval');
       try {
         await this.zigbee.checkConnectZigbee()
+        this.deleteLog()
       } catch (e) {
         console.log('error', e);
       }
