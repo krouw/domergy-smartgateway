@@ -67,7 +67,7 @@ module.exports = class SmartGateway {
           errorlog = './err-0.log'
     checkFile(log, ( err, stat ) => {
       if(err){
-       console.log('Error File log', err);
+       //console.log('Error File log', err);
       }
       else {
         if ( stat.size > 200000000 ) {
@@ -77,7 +77,7 @@ module.exports = class SmartGateway {
     })
     checkFile(errorlog, ( err, stat ) => {
       if(err){
-       console.log('Error File errorlog', err);
+       //console.log('Error File errorlog', err);
       }
       else {
         if ( stat.size > 200000000 ) {
@@ -176,6 +176,7 @@ module.exports = class SmartGateway {
 
   eventsZigbee () {
     this.zigbee.on('measurement', ( payload ) => {
+      console.log('frame', payload);
       this.buildFrame( payload )
     })
   }
