@@ -94,6 +94,7 @@ module.exports = class MqttTransport extends EventEmitter {
   publish ( topic, message, options ) {
     return new Promise((resolve, reject) => {
       const payload = JSON.stringify(message)
+      console.log('topic', topic);
       console.log('mqtt', message);
       this.client.publish( topic, payload, options, (err) => {
         if ( err ){
