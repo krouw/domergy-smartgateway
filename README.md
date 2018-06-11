@@ -12,9 +12,14 @@ docker run --name=meter --privileged CONTAINER
 
 PM2
 
-1. sudo su
-2. as root, rm /etc/init.d/pm2-init.sh
-3. as root, run pm2 startup. it still complains that /etc/init.d/pm2-init.sh links already exists, despite just removing it
-4. as root, pm2 start (my processes, eg ecosystem.json), pm2 start ecosystem.json
-5. as root, pm2 save
+Restart PM2 services
+ su user -c "pm2 dump && pm2 kill" && su root -c "systemctl daemon-reload && systemctl enable pm2 && systemctl start pm2"
+
+Run PM2 Startup
+
+1. run sudo rm /etc/init.d/pm2-init.sh
+2. run pm2 startup systemd -u pi
+3. run sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u pi --hp /home/pi
+4. pm2 start index.js --name smart-gateway -e err.log -o out.log
+5. pm2 save
 6. reboot (if ubuntu)

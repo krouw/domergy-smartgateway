@@ -2,9 +2,9 @@ const SerialPort = require('serialport');
 const xbee_api = require('xbee-api');
 const _ = require('lodash')
 const moment = require('moment')
-const isJSON = require('../util/isJSON')
+const isJSON = require('../../util/isJSON')
 const EventEmitter = require('events');
-const ActionsZigbee = require('./actions/zigbee')
+const ActionsZigbee = require('../actions/zigbee')
 var C = xbee_api.constants;
 const util = require('util')
 
@@ -154,7 +154,7 @@ module.exports = class Zigbee extends EventEmitter {
     }
 
   async checkConnectZigbee () {
-    console.log('var connect', this.getConnect());
+    console.log('ZB Connect ==>', this.getConnect());
     if( !this.getConnect() ) {
       console.log('checkConnectZigbee if');
       try {

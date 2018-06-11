@@ -1,4 +1,4 @@
-const Meter = require('./src/meter')
+const SmartGateway = require('./src/SmartGateway')
 let env_path = '.env'
 
 if ( process.env.NODE_ENV === 'development' ) {
@@ -11,13 +11,14 @@ const config = {
   id: process.env.ID,
   xbeeProductId: process.env.ID_XBEE,
   mqtt: {
-    server: process.env.MQTT_SERVER,
+    host: process.env.MQTT_SERVER,
     port: process.env.MQTT_PORT,
-    client: process.env.MQTT_CLIENT
+    client: process.env.MQTT_CLIENT,
+    password: process.env.MQTT_PASSWORD,
   },
-  interval: 5000,
+  interval: 10000,
 }
 
-const meter = new Meter( config )
+const sg = new SmartGateway( config )
 
-meter.start()
+sg.start()

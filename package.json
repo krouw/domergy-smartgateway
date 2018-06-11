@@ -16,6 +16,7 @@
     "moment": "^2.21.0",
     "mqtt": "^2.16.0",
     "redux": "^3.7.2",
+    "redux-persist": "^5.9.1",
     "serialport": "^4.0.7",
     "superstruct": "^0.4.12",
     "xbee-api": "^0.5.6"

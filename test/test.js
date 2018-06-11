@@ -1,5 +1,5 @@
 const expect = require("chai").expect
-const Meter = require('../src/meter')
+const SmartGateway = require('../src/SmartGateway')
 const assert = require('chai').assert
 
 require('dotenv').config({ path: '.env.development' })
@@ -10,19 +10,21 @@ describe("attributeValidation", () => {
     id: process.env.ID,
     xbeeProductId: process.env.ID_XBEE,
     mqtt: {
-      server: process.env.MQTT_SERVER,
+      host: process.env.MQTT_SERVER,
       port: process.env.MQTT_PORT,
-      client: process.env.MQTT_CLIENT
-    }
+      client: process.env.MQTT_CLIENT,
+      password: process.env.MQTT_PASSWORD,
+    },
+    interval: 5000,
   }
 
-  let meter = {};
+  let sg = {};
   const testPromise = ( test ) => {
     return new Promise(function(resolve, reject) {
       let count = 0
       let func = []
       test.forEach( data => {
-        func.push(meter.validateFrame(data))
+        func.push(sg.validateFrame(data))
       })
       Promise.all(func.map(p => p.catch(() => undefined)))
         .then((value) => {
@@ -34,7 +36,7 @@ describe("attributeValidation", () => {
   }
 
   before( ( done ) => {
-    meter = new Meter( config )
+    sg = new SmartGateway( config )
 
     done()
   })
