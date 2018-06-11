@@ -176,7 +176,6 @@ module.exports = class SmartGateway {
 
   eventsZigbee () {
     this.zigbee.on('measurement', ( payload ) => {
-      console.log('frame', payload);
       this.buildFrame( payload )
     })
   }
