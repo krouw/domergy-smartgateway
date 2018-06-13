@@ -180,6 +180,7 @@ module.exports = class Zigbee extends EventEmitter {
 
   eventsSerial () {
     this.xbee.on("frame_object", (frame) => {
+      console.log('frame', frame);
       this.routerZigbee(frame)
     });
 
