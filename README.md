@@ -1,5 +1,10 @@
 # Raspberry Smart Gateway Xbee/MQTT
 
+
+### Requirements
+
+1. NodeJS v8 and npm 
+
 ### Run as a service with PM2!
 
 1. Jus run `$ chmod +x install.sh`
