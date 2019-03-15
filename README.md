@@ -2,7 +2,8 @@
 
 ### Run as a service with PM2!
 
-Just run `$ ./install.sh`
+1. Jus run `$ chmod +x install.sh`
+2. and then `$ ./install.sh`
 
 have problems? Try manual configuration:
 
