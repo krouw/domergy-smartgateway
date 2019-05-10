@@ -1,56 +1,56 @@
-const Zigbee = require('./DevComm/zigbee')
-const _ = require('lodash')
-const store = require('./store')
-const moment = require('moment')
-const ActionsMqtt = require('./actions/Mqtt')
-const { checkFile, deleteFile } = require('./actions/file')
-const mqttClient = require('./services/mqtt')
+const Zigbee = require("./DevComm/zigbee");
+const _ = require("lodash");
+const store = require("./store");
+const moment = require("moment");
+const ActionsMqtt = require("./actions/Mqtt");
+const { checkFile, deleteFile } = require("./actions/file");
+const mqttClient = require("./services/mqtt");
 
 module.exports = class SmartGateway {
-
-  constructor ( config ) {
-    const validate = this._validateConstructor( config.id , config.xbeeProductId, config.mqtt )
-    if( _.isEmpty(validate) ) {
-      this.id = config.id
-      this.zigbee = new Zigbee( config.xbeeProductId, store )
-      this.clientMQTT = new mqttClient( config.mqtt )
-      this.store = store
-      this.interval = config.interval || 10000
-    }
-    else {
-      throw new Error(JSON.stringify(validate))
+  constructor(config) {
+    const validate = this._validateConstructor(
+      config.id,
+      config.xbeeProductId,
+      config.mqtt
+    );
+    if (_.isEmpty(validate)) {
+      this.id = config.id;
+      this.zigbee = new Zigbee(config.xbeeProductId, store);
+      this.clientMQTT = new mqttClient(config.mqtt);
+      this.store = store;
+      this.interval = config.interval || 10000;
+    } else {
+      throw new Error(JSON.stringify(validate));
     }
   }
 
-  _validateConstructor( id, xbeeProductId, mqttConfig ) {
+  _validateConstructor(id, xbeeProductId, mqttConfig) {
+    let errors = {};
 
-    let errors = {}
-
-    if( !_.isString( xbeeProductId ) ){
-      errors.xbeeProductId = "Parametro Invalido"
+    if (!_.isString(xbeeProductId)) {
+      errors.xbeeProductId = "Parametro Invalido";
     }
 
-    if( _.isEmpty( mqttConfig ) ){
-      errors.mqttConfig = "Parametro Invalido"
+    if (_.isEmpty(mqttConfig)) {
+      errors.mqttConfig = "Parametro Invalido";
     }
 
-    if( _.isEmpty(id) ) {
-      errors.id = 'Parametro Invalido'
+    if (_.isEmpty(id)) {
+      errors.id = "Parametro Invalido";
     }
 
-    if( !store ) {
-      errors.store = 'Error Store'
+    if (!store) {
+      errors.store = "Error Store";
     }
 
-    return errors
-
+    return errors;
   }
 
-  async start () {
+  async start() {
     try {
-      await this.bootstrap()
+      await this.bootstrap();
     } catch (e) {
-      console.error('Start Error', e)
+      console.error("Start Error", e);
     }
     /*
     *
@@ -62,125 +62,130 @@ module.exports = class SmartGateway {
     */
   }
 
-  deleteLog () {
-    const log = './out-0.log',
-          errorlog = './err-0.log'
-    checkFile(log, ( err, stat ) => {
-      if(err){
-       //console.log('Error File log', err);
-      }
-      else {
-        if ( stat.size > 200000000 ) {
-          deleteFile(log)
+  deleteLog() {
+    const log = "./out-0.log",
+      errorlog = "./err-0.log";
+    checkFile(log, (err, stat) => {
+      if (err) {
+        //console.log('Error File log', err);
+      } else {
+        if (stat.size > 200000000) {
+          deleteFile(log);
         }
       }
-    })
-    checkFile(errorlog, ( err, stat ) => {
-      if(err){
-       //console.log('Error File errorlog', err);
-      }
-      else {
-        if ( stat.size > 200000000 ) {
-          deleteFile(errorlog)
+    });
+    checkFile(errorlog, (err, stat) => {
+      if (err) {
+        //console.log('Error File errorlog', err);
+      } else {
+        if (stat.size > 200000000) {
+          deleteFile(errorlog);
         }
       }
-    })
+    });
   }
 
-  async bootstrap () {
-    setInterval( async () => {
+  async bootstrap() {
+    setInterval(async () => {
       //console.log('Interval');
       try {
-        await this.zigbee.checkConnectZigbee()
-        this.deleteLog()
+        await this.zigbee.checkConnectZigbee();
+        this.deleteLog();
       } catch (e) {
-        console.log('error', e);
+        console.log("Error Bootstrap", e);
       }
-    }, this.interval)
+    }, this.interval);
     try {
-      this.eventsZigbee()
-      await this.clientMQTT.start()
+      this.eventsZigbee();
+      await this.clientMQTT.start();
     } catch (e) {
-      throw e
+      throw e;
     }
   }
 
-  validateFrame ( packet ) {
-   return new Promise((resolve, reject) => {
-     let errors = {};
-     const split = packet.split(',')
-     const payload = {
-       id_device: split[0],
-       id_attribute: split[1],
-       value: split[2],
-       timestamp: moment( split[3]+'T'+split[4], "DD/MM/YYYYTHH:mm:ss", true).toDate()
-     }
-     const timestamp = moment.utc(payload.timestamp)
-     const nowUTC = moment().utc()
+  validateFrame(packet) {
+    return new Promise((resolve, reject) => {
+      let errors = {};
+      const split = packet.split(",");
+      const payload = {
+        id_device: split[0],
+        id_attribute: split[1],
+        value: split[2],
+        timestamp: moment(
+          split[3] + "T" + split[4],
+          "DD/MM/YYYYTHH:mm:ss",
+          true
+        ).toDate()
+      };
+      const timestamp = moment.utc(payload.timestamp);
+      const nowUTC = moment().utc();
 
-     if( !_.isString(packet) || split.length != 5) {
-       errors.packet = 'Paquete Invalido'
-       reject(errors)
-     }
+      if (!_.isString(packet) || split.length != 5) {
+        errors.packet = "Paquete Invalido";
+        reject(errors);
+      }
 
-     if( _.isEmpty(payload.id_attribute) || !_.isInteger(+payload.id_attribute) ) {
-       errors.id_attribute = 'Parametro Invalido'
-     }
+      if (
+        _.isEmpty(payload.id_attribute) ||
+        !_.isInteger(+payload.id_attribute)
+      ) {
+        errors.id_attribute = "Parametro Invalido";
+      }
 
-     if( _.isEmpty(payload.id_device) ) {
-       errors.id_device = 'Parametro Invalido'
-     }
+      if (_.isEmpty(payload.id_device)) {
+        errors.id_device = "Parametro Invalido";
+      }
 
-     if( !moment(payload.timestamp).isValid() || (nowUTC.diff( timestamp , 'hours' ) != 0) ){
-       payload.timestamp = nowUTC.format()
-     }
+      if (
+        !moment(payload.timestamp).isValid() ||
+        nowUTC.diff(timestamp, "hours") != 0
+      ) {
+        payload.timestamp = nowUTC.format();
+      }
 
-     if( _.isEmpty(payload.value) || !isFinite(+payload.value) ){
-       errors.value = 'Parametro Invalido'
-     }
+      if (_.isEmpty(payload.value) || !isFinite(+payload.value)) {
+        errors.value = "Parametro Invalido";
+      }
 
-     if( _.isEmpty(errors)  ){
-       resolve(payload)
-     }
-     else {
-       reject(errors)
-     }
+      if (_.isEmpty(errors)) {
+        resolve(payload);
+      } else {
+        reject(errors);
+      }
+    });
+  }
 
-   })
- }
+  buildFrame(packet) {
+    this.validateFrame(packet)
+      .then(payload => {
+        this.publish(payload);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
 
-  buildFrame( packet ) {
-   this.validateFrame( packet )
-     .then((payload) => {
-       this.publish(payload)
-     })
-     .catch((err) => {
-       console.error(err);
-     })
- }
+  async publish(message) {
+    const topic = `device/${message.id_device}/attrs/${message.id_attribute}`;
+    const payload = {
+      timestamp: message.timestamp,
+      value: message.value
+    };
+    try {
+      await this.clientMQTT.publish(topic, payload);
+    } catch (e) {
+      console.error("Error MQTT", e);
+      throw e;
+    }
+  }
 
- async publish ( message ) {
-   const topic = `device/${message.id_device}/attrs/${message.id_attribute}`
-   const payload = {
-     timestamp: message.timestamp,
-     value: message.value,
-   }
-   try {
-     await this.clientMQTT.publish( topic, payload )
-   } catch (e) {
-     console.error('error',e)
-     throw e
-   }
- }
-
-
-  eventsZigbee () {
-    this.zigbee.on('measurement', ( payload ) => {
-      this.buildFrame( payload )
-    })
+  eventsZigbee() {
+    this.zigbee.on("measurement", payload => {
+      this.buildFrame(payload);
+    });
   }
 
   log(message) {
     console.log(new Date().toString(), message);
   }
-}
+};
